@@ -1,0 +1,33 @@
+{
+  "functions": {
+    "api/*.js": {
+      "runtime": "@vercel/node@3"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/GlobalVariablesP/Global",
+      "dest": "/api/settings"
+    },
+    {
+      "src": "/api/products/(.*)",
+      "dest": "/api/product?id=$1"
+    },
+    {
+      "src": "/api/users/(.*)",
+      "dest": "/api/user?id=$1"
+    },
+    {
+      "src": "/api/categories/(.*)",
+      "dest": "/api/category?id=$1"
+    },
+    {
+      "src": "/api/clients/(.*)",
+      "dest": "/api/client?id=$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ]
+}
