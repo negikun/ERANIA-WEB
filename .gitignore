@@ -16,6 +16,10 @@ firestore-debug.log
 .env.test.local
 .env.production.local
 
+# Firebase Service Account Keys (SECURITY CRITICAL)
+*firebase-adminsdk*.json
+service-account-key.json
+
 # IDE
 .vscode/
 .idea/
@@ -30,10 +34,10 @@ Thumbs.db
 logs/
 *.log
 
-# Development files
-server.js
-package.json
-package-lock.json
+# Development files (commented out as these are needed)
+# server.js
+# package.json
+# package-lock.json
 
 # Temporary files
 *.tmp

@@ -13,39 +13,53 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // Initialize Firebase Admin SDK
-// You need to download your service account key from Firebase Console
-// and either set the path in environment variable or use the key directly
+let firebaseApp;
 try {
-    if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-        // Using service account key file
-        admin.initializeApp({
-            credential: admin.credential.applicationDefault(),
-            projectId: process.env.FIREBASE_PROJECT_ID
-        });
-    } else {
-        // For development - you can paste your service account key here
-        // Download it from Firebase Console > Project Settings > Service Accounts
-        const serviceAccount = {
-             "type": "service_account",
-            "project_id": "erania-d9833",
-            "private_key_id": "3d92c8b2cd15fbfc2e294570f46621c5caef0a48",
-            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQColR+2DmN5eF0Q\n9tHepUAj2SheCBCAY4+hnFqlnREyo+P5yhOKYieasJbdhnTcUbnF5H/0KN6hu4Xy\n7O1hj2BWQoF/9gCsD2Z9mGkgqqrsfLlvrcvU+dZXDXwqCZofIifPZzDk77MRIf1L\noQ/XsRGhB/0hiIGy2FEYUdUU+CuFY5jMbup5Gi2uiFG5WpEO+fJ9NdcSvLskR4vh\ne54pLi0TwjEIkjCIiFiK5gmNSycndLHvWLAosuf9iq2AaMxnsleGISbLrhzGHqXM\ny0zkQTTwIIaWEsPF0qBHloBPddUVfUC3YyWilvGEZY27XecZ/4xWsLIPgOIVhAWk\nHCg+xde/AgMBAAECggEAEV1rACHIoAEvSkliTNYmHosxMUkQtL43U/pQYVwlzVrn\nEhp9Rh/eMdJGzVga6Xwxmpodjqo3DzR1vml7+jSpQ7ljWtRINXD7VFdCskQM3yyU\ncqsq99Z+/EXoqEaHmEq4Ybt2DzRG9FjVR9kLUg3B4ch6Noi3yL2nfM3RGRvcanIw\n339gdWTEO+GrN4QrPYBHLVQLEwAMssLCueXVwE2Bh+fTfmSiYWNRJgW64O/1dLO4\nOjVa+lK5R0QOX6/mMXgikiz5jOBheeDwSi99wvub6ryYubEI/1A8el4TTGX/Nsrj\nUUyyuGVD2tUkJLJFfaP9hIYg9k5lQzi0ea0OhO10YQKBgQDmgtp9vF1U3/v/83+P\nQmhSQRaFwDee3suOMkgdmRPuw/irQyThsL5oyHUqF9oxtbTmmDm+nV/JyjIbZrTr\nBQ9ANwvmtg+6nX7ChDgqFjXeuKWnvHbGPTpeHHuE07fZ7oX/st9yp0DzZNMkV/R5\n11obeeydWbyR3hUJk4AkU4sIGwKBgQC7OT0NwDsKb138yEFXyzjPzd/LnqZ+TrUS\nFjojpflO17/9Ksz+hdz0Aa/kAmd2m4UoGcdS1ub6oUUKs+JGwzmdhDD4HSFAjL+p\nBIZ/Sq4w6divYsUyw1pGuK+S+iacRCl76pM4oO4TjuyaqwS5Qn0slTubFvkeDCCs\nl0A8eVzxLQKBgBDgN5rI9ZRHKa3dZ9NXK0gKV9nG7suEyCZK7BiuolTyp/vx2Htl\ncys8scc5I9JL2UigkGmyH9coJG75H/mszycGYKqtXY1uBl+7SllacusxXX9gPtnY\nlbNaJnjc/zLHUawcrls4f3rSQNsCTXW2HHSygm4qqbGMLsIauGDwdNdNAoGAKQUu\nek/O38dsyVC6+FhfVzBdQ0i8Y9os1AyoqlzYFc0xlG+HQJDly1R/TC62qocCkrmr\nMVxCeVFSRjkJb8WgXwGylPoU6gasi4ShT0x2g+MIhczXNfsVUX9vgH1sbjqE+FB5\n9yNTZlefQXgM7eZCdL0xtRZAeLPhiM8O1PEmSvUCgYEA1JbHyKOb2ycwuZziYIea\ndxa6MVhDh7GyRr/z4CN60BaxJ3XkVm3jOG1Y2hNIj5IsUdk+t+D7cyUdlf9BCRM9\nq0QXekobkB+qb7iqOWt1pkoqEq159TlTfHqf4t1gr27q2Db7ZqUyayXhuHgjMWqc\n0HyxhxbXPYUC75DmyiJG51s=\n-----END PRIVATE KEY-----\n",
-            "client_email": "firebase-adminsdk-fbsvc@erania-d9833.iam.gserviceaccount.com",
-            "client_id": "118203012127922279816",
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40erania-d9833.iam.gserviceaccount.com",
-            "universe_domain": "googleapis.com"
-        };
+    // Check if we already have an initialized app
+    try {
+        firebaseApp = admin.app();
+        console.log('✅ Firebase Admin already initialized');
+    } catch (error) {
+        // No app exists, initialize one
+        console.log('🔐 Initializing Firebase Admin...');
         
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
+        if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+            // Using service account key file (development)
+            firebaseApp = admin.initializeApp({
+                credential: admin.credential.applicationDefault(),
+                projectId: process.env.FIREBASE_PROJECT_ID || 'erania-d9833'
+            });
+            console.log('✅ Firebase Admin initialized with service account file');
+        } else if (process.env.NODE_ENV === 'production') {
+            // Production: Use default credentials (automatically provided by Firebase/GCP)
+            firebaseApp = admin.initializeApp({
+                projectId: 'erania-d9833'
+            });
+            console.log('✅ Firebase Admin initialized with default credentials');
+        } else {
+            // Development fallback: Try default credentials
+            try {
+                firebaseApp = admin.initializeApp({
+                    credential: admin.credential.applicationDefault(),
+                    projectId: 'erania-d9833'
+                });
+                console.log('✅ Firebase Admin initialized with default credentials');
+            } catch (fallbackError) {
+                console.error('❌ Firebase initialization failed. Please set GOOGLE_APPLICATION_CREDENTIALS or ensure service account is available.');
+                throw fallbackError;
+            }
+        }
     }
     
+    // Test Firebase connection
+    admin.firestore().settings({ ignoreUndefinedProperties: true });
+    console.log('✅ Firestore connection established');
+    
 } catch (error) {
-    console.error('Error initializing Firebase Admin:', error);
+    console.error('❌ Error initializing Firebase Admin:', error.message);
+    if (error.code) {
+        console.error('Error code:', error.code);
+    }
     process.exit(1);
 }
 
